@@ -12,7 +12,7 @@ from fastapi import HTTPException, status
 
 from .logger import logger
 from ..config import settings
-from ..models import CryptoInsight
+from ..models import CryptoInsightOutput
 
 
 class CoinMarketCapClient:
@@ -66,7 +66,7 @@ class CoinMarketCapClient:
             response.raise_for_status()
             return response.json()
 
-    async def fetch_coin_data(self, symbol: str) -> CryptoInsight:
+    async def fetch_coin_data(self, symbol: str) -> CryptoInsightOutput:
         """
         Fetch cryptocurrency data from CoinMarketCap API.
 
@@ -74,7 +74,7 @@ class CoinMarketCapClient:
             symbol: Cryptocurrency symbol name (e.g., 'bitcoin')
 
         Returns:
-            Normalized CryptoInsight data
+            Normalized CryptoInsightOutput data
 
         Raises:
             HTTPException: If API call fails or data is invalid
@@ -123,7 +123,7 @@ class CoinMarketCapClient:
                 platform = platform.get("name", None)
 
             # Create normalized response
-            insight = CryptoInsight(
+            insight = CryptoInsightOutput(
                 symbol=symbol,
                 name=crypto_data.get("name", symbol.capitalize()),
                 category=crypto_data.get("category", None),

@@ -15,10 +15,10 @@ async def fetch_symbol_data(symbol: Annotated[CryptoInsightInput, Query]):
     Fetch cryptocurrency data from CoinMarketCap API.
 
     Args:
-        symbol: Cryptocurrency symbol to fetch
+        symbol(CryptoInsightInput): Cryptocurrency symbol to fetch
 
     Returns:
-        Normalized CryptoInsight data
+        Normalized CryptoInsightOutput data
 
     Raises:
         HTTPException: 400 for invalid symbol, 503 for upstream failures
