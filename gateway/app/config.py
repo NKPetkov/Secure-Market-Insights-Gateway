@@ -7,7 +7,7 @@ load_dotenv(".env")
 class Settings(BaseSettings):
     """Configuration settings"""
 
-    coinmarketcap_base_url: str = "https://pro-api.coinmarketcap.com/v1"
+    coinmarketcap_base_url: str = "https://pro-api.coinmarketcap.com/v2"
     coinmarketcap_api_key: str = os.getenv("CMC_API_KEY")
     service_b_port: int = 8001
     log_level: str = "INFO"
