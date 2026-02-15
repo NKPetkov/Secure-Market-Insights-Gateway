@@ -1,5 +1,4 @@
 """CoinMarketCap API client"""
-import logging
 from typing import Dict, Any
 
 import httpx
@@ -11,10 +10,9 @@ from tenacity import (
 )
 from fastapi import HTTPException, status
 
-from .config import settings
-from .models import CryptoInsight
-
-logger = logging.getLogger(__name__)
+from .logger import logger
+from ..config import settings
+from ..models import CryptoInsight
 
 
 class CoinMarketCapClient:
