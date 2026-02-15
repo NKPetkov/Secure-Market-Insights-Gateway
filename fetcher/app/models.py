@@ -2,10 +2,6 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional
 
-class CryptoInsightInput(BaseModel):
-    """Normalized cryptocurrency insight input data."""
-    symbol: str = Field(min_length=1, max_length=50, description="Symbol name")
-
 
 class CryptoInsightOutput(BaseModel):
     """Normalized cryptocurrency insight output data."""

@@ -1,7 +1,7 @@
 import time
 from fastapi import APIRouter, status, Query
 from typing import Annotated
-from ..models import CryptoInsightInput, CryptoInsightOutput
+from ..models import CryptoInsightOutput
 from ..dependencies.coinmarketcap_client import coinmarketcap_client
 from ..dependencies.validator import validate_symbol
 from ..dependencies.logger import logger
@@ -10,12 +10,12 @@ app = APIRouter(prefix="/v1/fetch", tags=["fetch"])
 
 
 @app.get("/", response_model=CryptoInsightOutput, status_code=status.HTTP_200_OK)
-async def fetch_symbol_data(symbol: Annotated[CryptoInsightInput, Query]):
+async def fetch_symbol_data(symbol: Annotated[str, Query(min_length=1, max_length=50, description="Symbol name")]):
     """
     Fetch cryptocurrency data from CoinMarketCap API.
 
     Args:
-        symbol(CryptoInsightInput): Cryptocurrency symbol to fetch
+        symbol(str): Cryptocurrency symbol to fetch
 
     Returns:
         Normalized CryptoInsightOutput data
