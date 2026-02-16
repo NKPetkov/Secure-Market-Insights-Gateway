@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     coinmarketcap_api_key: str = os.getenv("CMC_API_KEY")
     service_b_port: int = 8001
     log_level: str = "INFO"
+    outside_request_timeout: 10
 
     class Config:
         env_file = ".env"

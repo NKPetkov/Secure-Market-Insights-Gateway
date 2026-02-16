@@ -10,7 +10,7 @@ app = APIRouter(prefix="/v1/fetch", tags=["fetch"])
 
 
 @app.get("/", response_model=CryptoInsightOutput, status_code=status.HTTP_200_OK)
-async def fetch_symbol_data(symbol: Annotated[str, Query(min_length=1, max_length=50, description="Symbol name")]):
+def fetch_symbol_data(symbol: Annotated[str, Query(min_length=1, max_length=50, description="Symbol name")]):
     """
     Fetch cryptocurrency data from CoinMarketCap API.
 
@@ -32,7 +32,7 @@ async def fetch_symbol_data(symbol: Annotated[str, Query(min_length=1, max_lengt
 
     try:
         # Fetch data from CoinMarketCap
-        insight = await coinmarketcap_client.fetch_coin_data(validated_symbol)
+        insight = coinmarketcap_client.fetch_coin_data(validated_symbol)
 
         duration = time.time() - start_time
         logger.info(

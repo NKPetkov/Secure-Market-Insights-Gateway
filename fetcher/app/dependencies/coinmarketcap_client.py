@@ -1,13 +1,12 @@
 """CoinMarketCap API client"""
 from typing import Dict, Any
 
-import httpx
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_exception_type,
+from httpx import (
+    Client,
+    HTTPStatusError,
+    RequestError
 )
+from httpx_retries import Retry, RetryTransport
 from fastapi import HTTPException, status
 
 from app.dependencies.logger import logger
@@ -22,7 +21,7 @@ class CoinMarketCapClient:
         """Initialize the CoinMarketCap client."""
         self.base_url = settings.coinmarketcap_base_url
         self.api_key = settings.coinmarketcap_api_key
-        self.timeout = 10.0  # 10 seconds timeout
+        self.timeout = float(settings.outside_request_timeout)  # 10 seconds timeout (float for httpx)
 
     def _validate_url(self, url: str) -> None:
         """
@@ -39,13 +38,8 @@ class CoinMarketCapClient:
                 f"SSRF protection: URL must start with {self.base_url}"
             )
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=1, max=8),
-        retry=retry_if_exception_type((httpx.HTTPStatusError, httpx.RequestError)),
-        reraise=True,
-    )
-    async def _fetch_with_retry(self, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+
+    def _fetch_with_retry(self, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
         """
         Fetch data with retry logic.
 
@@ -60,13 +54,17 @@ class CoinMarketCapClient:
             httpx.HTTPStatusError: If HTTP error occurs after retries
             httpx.RequestError: If connection error occurs after retries
         """
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        retry = Retry(total=3, backoff_factor=0.5)
+        transport = RetryTransport(retry=retry)
+
+        with Client(transport=transport) as client:
             logger.info(f"Fetching data from CoinMarketCap: {url}")
-            response = await client.get(url, headers=headers)
+            response = client.get(url, headers=headers, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
 
-    async def fetch_coin_data(self, symbol: str) -> CryptoInsightOutput:
+
+    def fetch_coin_data(self, symbol: str) -> CryptoInsightOutput:
         """
         Fetch cryptocurrency data from CoinMarketCap API.
 
@@ -93,7 +91,7 @@ class CoinMarketCapClient:
         }
 
         try:
-            data = await self._fetch_with_retry(url, headers)
+            data = self._fetch_with_retry(url, headers)
 
             # CoinMarketCap response structure:
             # {
@@ -138,7 +136,7 @@ class CoinMarketCapClient:
             logger.info(f"Successfully fetched data for {symbol} ({symbol})")
             return insight
 
-        except httpx.HTTPStatusError as e:
+        except HTTPStatusError as e:
             logger.error(f"HTTP error fetching {symbol}: {e.response.status_code}")
             if e.response.status_code == 400:
                 raise HTTPException(
@@ -160,7 +158,7 @@ class CoinMarketCapClient:
                 detail="Upstream API unavailable"
             )
 
-        except httpx.RequestError as e:
+        except RequestError as e:
             logger.error(f"Connection error fetching {symbol}: {e}")
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
