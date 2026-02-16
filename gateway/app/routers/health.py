@@ -2,10 +2,15 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, status
 from app.models import HealthResponse
 
+from app.dependencies.logger import logger
+from app.dependencies.cache import cache
+from app.dependencies.rate_limiter import rate_limit
+
 app = APIRouter(prefix="/v1/health", tags=["health"])
 
 
 @app.get("/", response_model=HealthResponse, status_code=status.HTTP_200_OK)
+@rate_limit()
 def health_check():
     """
     Health check endpoint.
@@ -13,7 +18,14 @@ def health_check():
     Returns:
         HealthResponse with current status and timestamp
     """
+    # Check Redis health
+    redis_healthy = cache.health_check()
+    status_msg = "healthy" if redis_healthy else "degraded"
+
+    if not redis_healthy:
+        logger.warning("Health check: Redis not available")
+
     return HealthResponse(
-        status="healthy",
+        status=status_msg,
         timestamp=datetime.now(timezone.utc)
     )

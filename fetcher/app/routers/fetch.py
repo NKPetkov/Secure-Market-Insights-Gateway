@@ -1,10 +1,10 @@
 import time
 from fastapi import APIRouter, status, Query
 from typing import Annotated
-from ..models import CryptoInsightOutput
-from ..dependencies.coinmarketcap_client import coinmarketcap_client
-from ..dependencies.validator import validate_symbol
-from ..dependencies.logger import logger
+from app.models import CryptoInsightOutput
+from app.dependencies.coinmarketcap_client import coinmarketcap_client
+from app.dependencies.validator import validate_symbol
+from app.dependencies.logger import logger
 
 app = APIRouter(prefix="/v1/fetch", tags=["fetch"])
 
