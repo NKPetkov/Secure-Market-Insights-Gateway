@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     api_token: str = os.getenv("BEARER_TOKEN")
     
     # Service B connection
-    service_b_url: str = "http://localhost:8001"
-    service_b_timeout: int = 10
+    fetcher_url: str = "http://localhost:8001"
+    fetcher_timeout: int = 10
     
     # Cache configuration
     cache_ttl_seconds: int = 600  # 10 minutes
