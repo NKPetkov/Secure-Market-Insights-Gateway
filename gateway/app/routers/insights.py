@@ -1,7 +1,13 @@
 import uuid, time
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    status,
+    Request
+)
 
 from app.models import (
     InsightRequest,
@@ -21,6 +27,7 @@ app = APIRouter(prefix="/v1/insights", tags=["insights"])
 @app.post("/", response_model=InsightResponse, tags=["Insights"])
 @rate_limit()
 def create_insight(
+    request: Request,
     insight_request: InsightRequest,
     token: str = Depends(verify_token)
 ):
@@ -109,6 +116,7 @@ def create_insight(
 @app.get("/{request_id}", response_model=InsightResponse, tags=["Insights"])
 @rate_limit(max_calls=20) # 20 calls per minute
 async def get_insight(
+    request: Request,
     request_id: str,
     token: str = Depends(verify_token)
 ):

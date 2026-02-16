@@ -4,7 +4,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.config import settings
 from app.dependencies.logger import logger
 
-security = HTTPBearer()
+security = HTTPBearer(
+    scheme_name="BearerAuth",
+    description="Enter your Bearer token (without the 'Bearer' prefix)",
+    auto_error=True
+)
 
 
 async def verify_token(

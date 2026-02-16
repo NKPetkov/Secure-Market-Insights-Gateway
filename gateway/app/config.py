@@ -1,18 +1,13 @@
-import os
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
-
-load_dotenv(".env")
-
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # Authentication
-    api_token: str = os.getenv("BEARER_TOKEN")
+    api_token: str = "dev-token-change-in-production"
     
     # Service B connection
-    fetcher_url: str        = "http://localhost:8001"
+    fetcher_url: str        = "http://localhost:8000"
     fetcher_timeout: int    = 10
     
     # Cache configuration
@@ -23,10 +18,10 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int  = 60  # 1 minute
 
     # Redis
-    redis_host: str     = os.getenv("REDIS_HOST")
-    redis_port: str     = os.getenv("REDIS_PORT")
-    redis_db: str       = os.getenv("REDIS_DB")
-    redis_password: str = os.getenv("REDIS_PASS")
+    redis_host: str     = "localhost"
+    redis_port: int     = 5665
+    redis_db: str       = "0"
+    redis_password: str = ""
     
     # Logging
     log_level: str = "INFO"
@@ -40,3 +35,5 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
+print(settings)

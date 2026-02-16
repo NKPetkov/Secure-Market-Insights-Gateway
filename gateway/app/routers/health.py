@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Request
 from app.models import HealthResponse
 
 from app.dependencies.logger import logger
@@ -11,7 +11,7 @@ app = APIRouter(prefix="/v1/health", tags=["health"])
 
 @app.get("/", response_model=HealthResponse, status_code=status.HTTP_200_OK)
 @rate_limit()
-def health_check():
+def health_check(request: Request):
     """
     Health check endpoint.
 
