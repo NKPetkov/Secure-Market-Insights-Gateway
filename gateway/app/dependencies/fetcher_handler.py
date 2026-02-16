@@ -8,7 +8,7 @@ from httpx import (
 from app.dependencies.logger import logger
 from app.config import settings
 
-def fetcher_request(symbol: str) -> dict:
+def fetch_symbol_data(symbol: str) -> dict:
     """
     Fetch data from Service B with timeout and error handling.
 
