@@ -16,13 +16,13 @@ class TokenRateLimiter:
         # Store: {token: [timestamp1, timestamp2, ...]}
         self._requests: Dict[str, list[float]] = defaultdict(list)
 
-    def _clean_old_requests(self, token: str, window_start: float):
+    def _clean_old_requests(self, identifier: str, window_start: float):
         """Remove requests outside the current window."""
-        self._requests[token] = [
-            ts for ts in self._requests[token] if ts > window_start
+        self._requests[identifier] = [
+            ts for ts in self._requests[identifier] if ts > window_start
         ]
 
-    def check_limit(self, token: str, rate_limit: int | None = None, time_limit: int | None = None) -> None:
+    def check_limit(self, identifier: str, rate_limit: int | None = None, time_limit: int | None = None) -> None:
         """
         Check if request is within rate limit for the given token.
 
@@ -34,22 +34,19 @@ class TokenRateLimiter:
         """
         current_time = time.time()
 
-        # Use token hash for logging (privacy)
-        token_id = f"token:{hash(token) % 10000:04d}"
-
         time_limit = time_limit or settings.rate_limit_window_seconds
 
         # Clean old requests
-        self._clean_old_requests(token, current_time - time_limit)
+        self._clean_old_requests(identifier, current_time - time_limit)
 
         # Check limit
-        request_count = len(self._requests[token])
+        request_count = len(self._requests[identifier])
 
         rate_limit = rate_limit or settings.rate_limit_requests
 
         if request_count >= rate_limit:
             logger.warning(
-                f"Rate limit exceeded for {token_id}: "
+                f"Rate limit exceeded for {identifier}: "
                 f"{request_count}/{rate_limit} requests"
             )
             raise HTTPException(
@@ -60,9 +57,9 @@ class TokenRateLimiter:
             )
 
         # Add current request
-        self._requests[token].append(current_time)
+        self._requests[identifier].append(current_time)
         logger.debug(
-            f"Rate limit check passed for {token_id}: "
+            f"Rate limit check passed for {identifier}: "
             f"{request_count + 1}/{rate_limit}"
         )
 
@@ -89,18 +86,21 @@ def rate_limit(max_calls: int | None = None, time_frame: int | None = None):
             # Extract token from kwargs (injected by verify_token dependency)
             token = kwargs.get('token')
 
-            if not token:
-                logger.error("Rate limiter decorator used on endpoint without token parameter")
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Rate limiting configuration error"
-                )
+            # Determine rate limit identifier
+            if token:
+                # Token-based rate limiting (from authenticated endpoints)
+                identifier = f"token:{hash(token) % 10000:04d}"
+                logger.debug(f"Rate limiting by token: {hash(token) % 10000:04d}")
+            else:
+                # IP-based rate limiting (for public endpoints)
+                identifier = f"ip:{request.client.host}"
+                logger.debug(f"Rate limiting by IP: {request.client.host}")
 
-            # Check rate limit
-            _rate_limiter.check_limit(token, max_calls, time_frame)
+                # Check rate limit
+                _rate_limiter.check_limit(identifier, max_calls, time_frame)
 
             # Call the original function
-            return await func(request, *args, **kwargs)
+            return func(request, *args, **kwargs)
 
         return wrapper
 

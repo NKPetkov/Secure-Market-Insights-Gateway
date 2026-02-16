@@ -4,10 +4,14 @@ from datetime import datetime
 from fastapi import (
     APIRouter,
     HTTPException,
-    Depends,
     status,
-    Request
+    Request,
+    Body,
+    Header,
+    Depends
 )
+
+from typing import Annotated
 
 from app.models import (
     InsightRequest,
@@ -15,21 +19,21 @@ from app.models import (
     InsightData
 )
 
-from app.dependencies.auth import verify_token
+from app.dependencies.auth import validate_authorization_header
 from app.dependencies.rate_limiter import rate_limit
 from app.dependencies.cache import cache
 from app.dependencies.logger import logger
 from app.dependencies.validator import validate_symbol
 from app.dependencies.fetcher_handler import fetch_symbol_data
 
-app = APIRouter(prefix="/v1/insights", tags=["insights"])
+app = APIRouter(prefix="/v1/insights", tags=["Insights"])
 
 @app.post("/", response_model=InsightResponse, tags=["Insights"])
 @rate_limit()
 def create_insight(
     request: Request,
-    insight_request: InsightRequest,
-    token: str = Depends(verify_token)
+    insight_request: Annotated[InsightRequest, Body(embed=True)],
+    token: Annotated[str, Header(description="Authorization: Bearer <token>")]
 ):
     """
     Create a new insight request for a cryptocurrency symbol.
@@ -49,6 +53,7 @@ def create_insight(
     Returns:
         Market insights data for the requested symbol
     """
+    validate_authorization_header(token)
 
     # Validate symbol
     symbol = validate_symbol(insight_request.symbol)
@@ -114,11 +119,12 @@ def create_insight(
 
 
 @app.get("/{request_id}", response_model=InsightResponse, tags=["Insights"])
-@rate_limit(max_calls=20) # 20 calls per minute
+# @require_auth
+# @rate_limit(max_calls=20) # 20 calls per minute
 async def get_insight(
     request: Request,
     request_id: str,
-    token: str = Depends(verify_token)
+    token: Annotated[str, Header(description="Authorization: Bearer <token>")]
 ):
     """
     Retrieve a cached insight by request ID.
@@ -134,6 +140,8 @@ async def get_insight(
     Returns:
         Cached market insights data
     """
+    validate_authorization_header(token)
+
     logger.info(f"Retrieving cached insight by request_id: {request_id}")
 
     # Lookup by request_id directly

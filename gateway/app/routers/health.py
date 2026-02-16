@@ -6,7 +6,7 @@ from app.dependencies.logger import logger
 from app.dependencies.cache import cache
 from app.dependencies.rate_limiter import rate_limit
 
-app = APIRouter(prefix="/v1/health", tags=["health"])
+app = APIRouter(prefix="/v1/health", tags=["Health"])
 
 
 @app.get("/", response_model=HealthResponse, status_code=status.HTTP_200_OK)
