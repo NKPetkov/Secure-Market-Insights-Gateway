@@ -1,4 +1,7 @@
-from pydantic_settings import BaseSettings
+import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DOTENV = os.path.join(os.path.dirname(__file__), ".env")
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
@@ -26,11 +29,12 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=DOTENV,
+        case_sensitive=False,
         env_file_encoding="utf-8",
         extra="ignore"
+    )
 
 
 # Global settings instance
