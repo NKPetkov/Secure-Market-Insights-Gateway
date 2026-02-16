@@ -10,9 +10,9 @@ from tenacity import (
 )
 from fastapi import HTTPException, status
 
-from .logger import logger
-from ..config import settings
-from ..models import CryptoInsightOutput
+from app.dependencies.logger import logger
+from app.config import settings
+from app.models import CryptoInsightOutput
 
 
 class CoinMarketCapClient:

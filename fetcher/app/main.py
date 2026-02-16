@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 
 from contextlib import asynccontextmanager
 
-from .routers import health, fetch
-from .dependencies.logger import logger
+from app.routers import health, fetch
+from app.dependencies.logger import logger
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
