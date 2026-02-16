@@ -12,15 +12,21 @@ class Settings(BaseSettings):
     api_token: str = os.getenv("BEARER_TOKEN")
     
     # Service B connection
-    fetcher_url: str = "http://localhost:8001"
-    fetcher_timeout: int = 10
+    fetcher_url: str        = "http://localhost:8001"
+    fetcher_timeout: int    = 10
     
     # Cache configuration
     cache_ttl_seconds: int = 600  # 10 minutes
     
     # Rate limiting
-    rate_limit_requests: int = 10
-    rate_limit_window_seconds: int = 60  # 1 minute
+    rate_limit_requests: int        = 10
+    rate_limit_window_seconds: int  = 60  # 1 minute
+
+    # Redis
+    redis_host: str     = os.getenv("REDIS_HOST")
+    redis_port: str     = os.getenv("REDIS_PORT")
+    redis_db: str       = os.getenv("REDIS_DB")
+    redis_password: str = os.getenv("REDIS_PASS")
     
     # Logging
     log_level: str = "INFO"
