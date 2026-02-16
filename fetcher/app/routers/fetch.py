@@ -9,7 +9,7 @@ from app.dependencies.logger import logger
 app = APIRouter(prefix="/v1/fetch", tags=["fetch"])
 
 
-@app.get("/", response_model=CryptoInsightOutput, status_code=status.HTTP_200_OK)
+@app.get("/symbol", response_model=CryptoInsightOutput, status_code=status.HTTP_200_OK)
 def fetch_symbol_data(symbol: Annotated[str, Query(min_length=1, max_length=50, description="Symbol name")]):
     """
     Fetch cryptocurrency data from CoinMarketCap API.

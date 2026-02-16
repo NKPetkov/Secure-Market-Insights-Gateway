@@ -1,17 +1,13 @@
-import os
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
-
-load_dotenv(".env")
 
 class Settings(BaseSettings):
     """Configuration settings"""
 
     coinmarketcap_base_url: str = "https://pro-api.coinmarketcap.com/v2"
-    coinmarketcap_api_key: str = os.getenv("CMC_API_KEY")
-    service_b_port: int = 8001
+    coinmarketcap_api_key: str = "dev-token-change-in-production"
+    fetcher_port: int = 8001
     log_level: str = "INFO"
-    outside_request_timeout: 10
+    outside_request_timeout: int = 10
 
     class Config:
         env_file = ".env"

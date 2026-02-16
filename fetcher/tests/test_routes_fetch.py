@@ -18,7 +18,7 @@ class TestFetchEndpoint:
 
     def test_fetch_requires_symbol_parameter(self, client):
         """Test fetch endpoint requires symbol query parameter."""
-        response = client.get("/v1/fetch")
+        response = client.get("/v1/fetch/symbol")
         assert response.status_code == 422  # Validation error
 
     def test_fetch_with_valid_symbol_returns_200(self, client, coinmarketcap_info_response_bitcoin):
@@ -38,12 +38,12 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             assert response.status_code == 200
 
     def test_fetch_with_invalid_symbol_returns_400(self, client):
         """Test fetch with invalid symbol returns 400."""
-        response = client.get("/v1/fetch?symbol=invalidcoin")
+        response = client.get("/v1/fetch/symbol?symbol=invalidcoin")
         assert response.status_code == 400
 
         data = response.json()
@@ -64,7 +64,7 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             data = response.json()
 
             assert "symbol" in data
@@ -90,7 +90,7 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             data = response.json()
 
             assert data["symbol"] == "bitcoin"
@@ -117,7 +117,7 @@ class TestFetchEndpoint:
             with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
                 mock_fetch.return_value = mock_insight
 
-                response = client.get(f"/v1/fetch?symbol={symbol}")
+                response = client.get(f"/v1/fetch/symbol?symbol={symbol}")
                 assert response.status_code == 200
 
     def test_fetch_symbol_case_insensitive(self, client):
@@ -137,7 +137,7 @@ class TestFetchEndpoint:
             with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
                 mock_fetch.return_value = mock_insight
 
-                response = client.get(f"/v1/fetch?symbol={symbol}")
+                response = client.get(f"/v1/fetch/symbol?symbol={symbol}")
                 assert response.status_code == 200
 
     def test_fetch_handles_upstream_503_error(self, client):
@@ -149,7 +149,7 @@ class TestFetchEndpoint:
                 detail="Upstream API unavailable"
             )
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             assert response.status_code == 503
 
     def test_fetch_handles_upstream_404_error(self, client):
@@ -161,7 +161,7 @@ class TestFetchEndpoint:
                 detail="Cryptocurrency not found"
             )
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             assert response.status_code == 404
 
     def test_fetch_handles_parsing_error(self, client):
@@ -173,7 +173,7 @@ class TestFetchEndpoint:
                 detail="Failed to parse upstream API response"
             )
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             assert response.status_code == 500
 
     def test_fetch_content_type(self, client):
@@ -191,7 +191,7 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            response = client.get("/v1/fetch?symbol=bitcoin")
+            response = client.get("/v1/fetch/symbol?symbol=bitcoin")
             assert "application/json" in response.headers["content-type"]
 
     def test_fetch_with_whitespace_in_symbol(self, client):
@@ -209,7 +209,7 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            response = client.get("/v1/fetch?symbol=%20bitcoin%20")  # URL encoded spaces
+            response = client.get("/v1/fetch/symbol?symbol=%20bitcoin%20")  # URL encoded spaces
             assert response.status_code == 200
 
     def test_fetch_calls_client_with_validated_symbol(self, client):
@@ -227,7 +227,7 @@ class TestFetchEndpoint:
         with patch('app.routers.fetch.coinmarketcap_client.fetch_coin_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = mock_insight
 
-            client.get("/v1/fetch?symbol=BITCOIN")
+            client.get("/v1/fetch/symbol?symbol=BITCOIN")
 
             # Verify client was called with lowercase symbol
             mock_fetch.assert_called_once_with("bitcoin")
@@ -248,12 +248,12 @@ class TestFetchEndpoint:
             mock_fetch.return_value = mock_insight
 
             for i in range(10):
-                response = client.get("/v1/fetch?symbol=bitcoin")
+                response = client.get("/v1/fetch/symbol?symbol=bitcoin")
                 assert response.status_code == 200
 
     def test_fetch_error_detail_format(self, client):
         """Test fetch error responses have correct detail format."""
-        response = client.get("/v1/fetch?symbol=invalidcoin")
+        response = client.get("/v1/fetch/symbol?symbol=invalidcoin")
         data = response.json()
 
         assert "detail" in data

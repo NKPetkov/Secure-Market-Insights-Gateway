@@ -13,7 +13,7 @@ def test_settings():
     return {
         "coinmarketcap_base_url": "https://pro-api.coinmarketcap.com/v2",
         "coinmarketcap_api_key": "268531e0-7dd8-46ab-8b06-f54b78330408",
-        "service_b_port": 8001,
+        "fetcher_port": 8001,
         "log_level": "DEBUG"
     }
 
