@@ -10,7 +10,7 @@ class CryptoInsightOutput(BaseModel):
     name: str                           = Field(..., description="Cryptocurrency name")
     category: str                       = Field(..., description="Cryptocurrency category, eg. coin, token")
     description: str                    = Field(..., description="Cryptocurrency description")
-    date_launched: str                  = Field(..., description="Launch date of hte cryptocurrency")
+    date_launched: Optional[str]        = Field(None, description="Launch date of hte cryptocurrency")
     logo: Optional[str]                 = Field(None, description="Cryptocurrency logo")
     platform: Optional[str]             = Field(None, description="Name of the platform hosting the cryptocurrency")
     circulating_suply: Optional[float]  = Field(None, description="Suply of the cryptocurrency in circulation")

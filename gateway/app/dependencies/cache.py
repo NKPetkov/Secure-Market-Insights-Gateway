@@ -103,10 +103,7 @@ class RedisCache:
             # Parse JSON result
             result_data = json.loads(result_json)
             logger.info(f"Cache hit by request_id: {request_id}")
-            return {
-                'data': InsightData(**result_data['data']),
-                'fetched_at': result_data['fetched_at']
-            }
+            return result_data  # Return the raw dict, not Pydantic objects
 
         except RedisError as e:
             logger.error(f"Redis error during get_by_request_id: {e}")

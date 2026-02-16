@@ -12,6 +12,7 @@ from fastapi import HTTPException, status
 from app.dependencies.logger import logger
 from app.config import settings
 from app.models import CryptoInsightOutput
+from app.dependencies.validator import ALLOWED_SYMBOLS
 
 
 class CoinMarketCapClient:
@@ -39,7 +40,7 @@ class CoinMarketCapClient:
             )
 
 
-    def _fetch_with_retry(self, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+    def _fetch_with_retry(self, url: str, parameters: dict, headers: Dict[str, str]) -> Dict[str, Any]:
         """
         Fetch data with retry logic.
 
@@ -59,7 +60,7 @@ class CoinMarketCapClient:
 
         with Client(transport=transport) as client:
             logger.info(f"Fetching data from CoinMarketCap: {url}")
-            response = client.get(url, headers=headers, timeout=self.timeout)
+            response = client.get(url, params=parameters, headers=headers, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
 
@@ -79,19 +80,24 @@ class CoinMarketCapClient:
         """
 
         # Build URL for CoinMarketCap quotes endpoint
-        url = f"{self.base_url}/cryptocurrency/info?slug={symbol}"
+        url = f"{self.base_url}/cryptocurrency/info"
+
+        #Prepare parameters
+        parameters = {
+            'slug': symbol
+        }
 
         # SSRF protection: validate URL
         self._validate_url(url)
 
         # Prepare headers with API key
         headers = {
-            "X-CMC_PRO_API_KEY": self.api_key,
-            "Accept": "application/json"
+            'Accepts': 'application/json',
+            'X-CMC_PRO_API_KEY': self.api_key,
         }
 
         try:
-            data = self._fetch_with_retry(url, headers)
+            data = self._fetch_with_retry(url, parameters, headers)
 
             # CoinMarketCap response structure:
             # {
@@ -103,19 +109,24 @@ class CoinMarketCapClient:
             #   }
             # }
 
+            symbol_id = str(ALLOWED_SYMBOLS[symbol])
+
             # Extract symbol data
-            crypto_data = data.get("data", {}).get(symbol)
+            crypto_data = data.get("data", {}).get(symbol_id)
             if not crypto_data:
                 raise ValueError(f"No data found for {symbol}")
 
             market_cap = crypto_data.get("self_reported_market_cap")
             circulating_suply = crypto_data.get("self_reported_circulating_supply")
 
-            # Validate required fields
-            if circulating_suply is None or market_cap is None:
-                raise ValueError("Missing required market data fields")
+            # Some coins (like BTC) return None for these params
+            # and to return 0 instead of None would be false data
+            market_cap = float(market_cap) if market_cap else None
+            circulating_suply = float(circulating_suply) if circulating_suply else None
             
             platform= crypto_data.get("platform", None)
+
+            print(crypto_data.get("date_launched"))
 
             if platform:
                 platform = platform.get("name", None)
@@ -129,8 +140,8 @@ class CoinMarketCapClient:
                 date_launched=crypto_data.get("date_launched", None),
                 logo=crypto_data.get("logo", None),
                 platform=platform,
-                circulating_suply=float(circulating_suply),
-                market_cap=float(market_cap)
+                circulating_suply=circulating_suply,
+                market_cap=market_cap
             )
 
             logger.info(f"Successfully fetched data for {symbol} ({symbol})")

@@ -33,7 +33,7 @@ app = APIRouter(prefix="/v1/insights", tags=["Insights"])
 def create_insight(
     request: Request,
     insight_request: Annotated[InsightRequest, Body(embed=True)],
-    token: Annotated[str, Header(description="Authorization: Bearer <token>")]
+    token: Annotated[str, Header(alias="Authorization", description="Authorization: Bearer <token>")]
 ):
     """
     Create a new insight request for a cryptocurrency symbol.
@@ -70,8 +70,8 @@ def create_insight(
         cached_data, cached_request_id = cached_result
         logger.info(f"Returning cached data for {query_params} (request_id: {cached_request_id})")
 
-        # Add fetched_at timestamp to cached data
-        fetched_at = datetime.fromisoformat(cached_data.get("fetched_at"))
+        # Get fetched_at timestamp from cached data (stored as Unix timestamp)
+        fetched_at = cached_data.get("fetched_at")
 
         return InsightResponse(
             request_id=cached_request_id,
@@ -124,7 +124,7 @@ def create_insight(
 async def get_insight(
     request: Request,
     request_id: str,
-    token: Annotated[str, Header(description="Authorization: Bearer <token>")]
+    token: Annotated[str, Header(alias="Authorization", description="Authorization: Bearer <token>")]
 ):
     """
     Retrieve a cached insight by request ID.
@@ -154,8 +154,8 @@ async def get_insight(
             detail=f"No cached insights found for request_id '{request_id}'"
         )
 
-    # Extract fetched_at timestamp
-    fetched_at = datetime.fromisoformat(cached_data.get("fetched_at"))
+    # Get fetched_at timestamp from cached data (stored as Unix timestamp)
+    fetched_at = cached_data.get("fetched_at")
 
     return InsightResponse(
         request_id=request_id,

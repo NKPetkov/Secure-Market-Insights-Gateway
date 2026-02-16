@@ -1,4 +1,7 @@
-from pydantic_settings import BaseSettings
+import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DOTENV = os.path.join(os.path.dirname(__file__), ".env")
 
 class Settings(BaseSettings):
     """Configuration settings"""
@@ -9,11 +12,12 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     outside_request_timeout: int = 10
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=DOTENV,
+        case_sensitive=False,
         env_file_encoding="utf-8",
         extra="ignore"
+    )
 
 
 settings = Settings()

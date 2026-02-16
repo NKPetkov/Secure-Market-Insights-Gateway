@@ -2,13 +2,12 @@
 from fastapi import HTTPException, status
 
 # Whitelist of allowed cryptocurrency symbols
-ALLOWED_SYMBOLS = [
-    "bitcoin",
-    "ethereum",
-    "cardano",
-    "solana",
-    "polkadot"
-]
+ALLOWED_SYMBOLS = {
+    "bitcoin": 1,
+    "ethereum": 1027,
+    "cardano": 2010,
+    "solana": 5426
+}
 
 
 def validate_symbol(symbol: str) -> str:
@@ -26,10 +25,10 @@ def validate_symbol(symbol: str) -> str:
     """
     symbol_lower = symbol.lower().strip()
 
-    if symbol_lower not in ALLOWED_SYMBOLS:
+    if symbol_lower not in ALLOWED_SYMBOLS.keys():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid symbol. Allowed symbols: {', '.join(ALLOWED_SYMBOLS)}"
+            detail=f"Invalid symbol. Allowed symbols: {', '.join(ALLOWED_SYMBOLS.keys())}"
         )
 
     return symbol_lower

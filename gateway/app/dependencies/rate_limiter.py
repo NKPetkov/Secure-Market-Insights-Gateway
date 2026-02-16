@@ -96,8 +96,8 @@ def rate_limit(max_calls: int | None = None, time_frame: int | None = None):
                 identifier = f"ip:{request.client.host}"
                 logger.debug(f"Rate limiting by IP: {request.client.host}")
 
-                # Check rate limit
-                _rate_limiter.check_limit(identifier, max_calls, time_frame)
+            # Check rate limit
+            _rate_limiter.check_limit(identifier, max_calls, time_frame)
 
             # Call the original function
             return func(request, *args, **kwargs)
